@@ -1,0 +1,227 @@
+### Test Auth - Register
+POST https://localhost:7065/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "newuser@pokestore.com",
+  "password": "Test@12345",
+  "confirmPassword": "Test@12345",
+  "firstName": "John",
+  "lastName": "Doe"
+}
+
+### Test Auth - Login
+POST https://localhost:7065/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@pokestore.com",
+  "password": "Test@12345"
+}
+
+### Test Auth - Get Profile (requires token from login)
+GET https://localhost:7065/api/auth/profile
+Authorization: Bearer <token_from_login>
+
+### Get All Products
+GET https://localhost:7065/api/products
+Content-Type: application/json
+
+### Get Product by ID
+GET https://localhost:7065/api/products/1
+Content-Type: application/json
+
+### Search Products
+GET https://localhost:7065/api/products/search?query=Pikachu
+Content-Type: application/json
+
+### Get Products by Category
+GET https://localhost:7065/api/products/category/1
+Content-Type: application/json
+
+### PHASE 2: CART OPERATIONS (Requires authentication)
+
+### Get Cart (empty initially)
+GET https://localhost:7065/api/cart
+Authorization: Bearer <token_from_login>
+Content-Type: application/json
+
+### Add Item to Cart
+POST https://localhost:7065/api/cart/items
+Authorization: Bearer <token_from_login>
+Content-Type: application/json
+
+{
+  "productId": 1,
+  "quantity": 2
+}
+
+### Add Another Item
+POST https://localhost:7065/api/cart/items
+Authorization: Bearer <token_from_login>
+Content-Type: application/json
+
+{
+  "productId": 3,
+  "quantity": 1
+}
+
+### Get Cart with Items
+GET https://localhost:7065/api/cart
+Authorization: Bearer <token_from_login>
+Content-Type: application/json
+
+### Update Cart Item Quantity
+PUT https://localhost:7065/api/cart/items/1
+Authorization: Bearer <token_from_login>
+Content-Type: application/json
+
+{
+  "quantity": 5
+}
+
+### Get Cart Summary with Totals
+GET https://localhost:7065/api/cart/summary
+Authorization: Bearer <token_from_login>
+Content-Type: application/json
+
+### Remove Item from Cart
+DELETE https://localhost:7065/api/cart/items/1
+Authorization: Bearer <token_from_login>
+Content-Type: application/json
+
+### Clear Entire Cart
+DELETE https://localhost:7065/api/cart/clear
+Authorization: Bearer <token_from_login>
+Content-Type: application/json
+
+### PHASE 3: CHECKOUT & ORDER MANAGEMENT
+
+### Validate Checkout (before payment)
+POST https://localhost:7065/api/checkout/validate
+Authorization: Bearer <token_from_login>
+Content-Type: application/json
+
+{
+  "shippingAddress": "123 Main St, Springfield, IL 62701"
+}
+
+### Initiate Payment (creates PendingPayment order)
+POST https://localhost:7065/api/checkout/initiate-payment
+Authorization: Bearer <token_from_login>
+Content-Type: application/json
+
+{
+  "shippingAddress": "123 Main St, Springfield, IL 62701",
+  "billingAddress": "456 Oak Ave, Springfield, IL 62702"
+}
+
+### Confirm Payment (marks order as Paid)
+POST https://localhost:7065/api/checkout/payment-confirmation
+Authorization: Bearer <token_from_login>
+Content-Type: application/json
+
+{
+  "orderId": 1
+}
+
+### Get Order by ID
+GET https://localhost:7065/api/orders/1
+Authorization: Bearer <token_from_login>
+Content-Type: application/json
+
+### Get Order by Order Number
+GET https://localhost:7065/api/orders/number/PO-20260605-1234
+Authorization: Bearer <token_from_login>
+Content-Type: application/json
+
+### Get User's Order History
+GET https://localhost:7065/api/orders?pageNumber=1&pageSize=10
+Authorization: Bearer <token_from_login>
+Content-Type: application/json
+
+### Get Order Invoice
+GET https://localhost:7065/api/orders/1/invoice
+Authorization: Bearer <token_from_login>
+Content-Type: application/json
+
+### Update Order Status (Admin only)
+PUT https://localhost:7065/api/orders/1/status
+Authorization: Bearer <admin_token>
+Content-Type: application/json
+
+{
+  "status": "Shipped"
+}
+
+### PHASE 4: PAYMENT INTEGRATION & WEBHOOKS
+
+### PayPal IPN Webhook Health Check
+GET https://localhost:7065/api/paymentwebhook/paypal/health
+Content-Type: application/json
+
+### Simulate PayPal IPN Webhook - Successful Payment
+POST https://localhost:7065/api/paymentwebhook/paypal/ipn
+Content-Type: application/x-www-form-urlencoded
+X-PAYPAL-TRANSMISSION-ID: test-webhook-123
+X-PAYPAL-TRANSMISSION-SIG: base64_signature_here
+
+mc_gross=65.00&txn_id=test_transaction_12345&payment_status=Completed&custom=1&txn_type=web_accept&payer_email=buyer@example.com&first_name=John&last_name=Doe
+
+### Simulate PayPal IPN Webhook - Failed Payment
+POST https://localhost:7065/api/paymentwebhook/paypal/ipn
+Content-Type: application/x-www-form-urlencoded
+X-PAYPAL-TRANSMISSION-ID: test-webhook-456
+X-PAYPAL-TRANSMISSION-SIG: base64_signature_here
+
+mc_gross=65.00&txn_id=test_transaction_failed&payment_status=Failed&custom=1&txn_type=web_accept&payer_email=buyer@example.com&first_name=John&last_name=Doe
+
+### Simulate PayPal IPN Webhook - Refund
+POST https://localhost:7065/api/paymentwebhook/paypal/ipn
+Content-Type: application/x-www-form-urlencoded
+X-PAYPAL-TRANSMISSION-ID: test-webhook-789
+X-PAYPAL-TRANSMISSION-SIG: base64_signature_here
+
+mc_gross=-65.00&txn_id=test_transaction_refunded&payment_status=Refunded&custom=1&txn_type=web_accept&reason_code=refund&payer_email=buyer@example.com&first_name=John&last_name=Doe
+
+### E2E: Complete Checkout Flow
+### Step 1: Add items to cart
+POST https://localhost:7065/api/cart/items
+Authorization: Bearer <token_from_login>
+Content-Type: application/json
+
+{
+  "productId": 1,
+  "quantity": 2
+}
+
+### Step 2: Validate checkout
+POST https://localhost:7065/api/checkout/validate
+Authorization: Bearer <token_from_login>
+Content-Type: application/json
+
+{
+  "shippingAddress": "123 Main St, Springfield, IL 62701"
+}
+
+### Step 3: Initiate payment (creates order)
+POST https://localhost:7065/api/checkout/initiate-payment
+Authorization: Bearer <token_from_login>
+Content-Type: application/json
+
+{
+  "shippingAddress": "123 Main St, Springfield, IL 62701",
+  "billingAddress": "456 Oak Ave, Springfield, IL 62702"
+}
+
+### Step 4: PayPal processes payment and sends webhook (automated by PayPal)
+### (In production, PayPal IPN would be sent automatically)
+
+### Step 5: Check order status (should be Paid after webhook)
+GET https://localhost:7065/api/orders/1
+Authorization: Bearer <token_from_login>
+Content-Type: application/json
+
+### Swagger UI
+GET https://localhost:7065/swagger
+
