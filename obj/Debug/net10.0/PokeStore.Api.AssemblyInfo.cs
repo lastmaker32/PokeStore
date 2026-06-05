@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("PokeStore.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+556edc75b8d0cfc1f1cb22db74becb240c33a0ff")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b9561d314acaa8f20f639f59d1d4f3f3d4cb52e0")]
 [assembly: System.Reflection.AssemblyProductAttribute("PokeStore.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("PokeStore.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
