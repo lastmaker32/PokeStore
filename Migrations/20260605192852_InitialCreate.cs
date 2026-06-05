@@ -172,7 +172,9 @@ namespace PokeStore.Api.Migrations
                     ReservedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ExpiresAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     ReleasedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    ConfirmedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    ConfirmedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CartId1 = table.Column<int>(type: "int", nullable: true),
+                    OrderId1 = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -181,14 +183,22 @@ namespace PokeStore.Api.Migrations
                         name: "FK_InventoryReservations_Carts_CartId",
                         column: x => x.CartId,
                         principalTable: "Carts",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_InventoryReservations_Carts_CartId1",
+                        column: x => x.CartId1,
+                        principalTable: "Carts",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_InventoryReservations_Orders_OrderId",
                         column: x => x.OrderId,
                         principalTable: "Orders",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_InventoryReservations_Orders_OrderId1",
+                        column: x => x.OrderId1,
+                        principalTable: "Orders",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_InventoryReservations_Products_ProductId",
                         column: x => x.ProductId,
@@ -260,6 +270,34 @@ namespace PokeStore.Api.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "ProcessedWebhooks",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    WebhookId = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    TransactionId = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    OrderId = table.Column<int>(type: "int", nullable: false),
+                    EventType = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    RawPayload = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IsProcessed = table.Column<bool>(type: "bit", nullable: false),
+                    ProcessedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProcessedWebhooks", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ProcessedWebhooks_Orders_OrderId",
+                        column: x => x.OrderId,
+                        principalTable: "Orders",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_CartItems_CartId",
                 table: "CartItems",
@@ -287,6 +325,11 @@ namespace PokeStore.Api.Migrations
                 column: "CartId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_InventoryReservations_CartId1",
+                table: "InventoryReservations",
+                column: "CartId1");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_InventoryReservations_ExpiresAt",
                 table: "InventoryReservations",
                 column: "ExpiresAt");
@@ -295,6 +338,11 @@ namespace PokeStore.Api.Migrations
                 name: "IX_InventoryReservations_OrderId",
                 table: "InventoryReservations",
                 column: "OrderId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_InventoryReservations_OrderId1",
+                table: "InventoryReservations",
+                column: "OrderId1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_InventoryReservations_ProductId",
@@ -344,6 +392,22 @@ namespace PokeStore.Api.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_ProcessedWebhooks_OrderId",
+                table: "ProcessedWebhooks",
+                column: "OrderId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProcessedWebhooks_TransactionId",
+                table: "ProcessedWebhooks",
+                column: "TransactionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProcessedWebhooks_WebhookId",
+                table: "ProcessedWebhooks",
+                column: "WebhookId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Products_CategoryId",
                 table: "Products",
                 column: "CategoryId");
@@ -375,6 +439,9 @@ namespace PokeStore.Api.Migrations
 
             migrationBuilder.DropTable(
                 name: "Payments");
+
+            migrationBuilder.DropTable(
+                name: "ProcessedWebhooks");
 
             migrationBuilder.DropTable(
                 name: "Carts");

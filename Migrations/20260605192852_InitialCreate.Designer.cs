@@ -12,7 +12,7 @@ using PokeStore.Api.Infrastructure.Data;
 namespace PokeStore.Api.Migrations
 {
     [DbContext(typeof(PokestoreDbContext))]
-    [Migration("20260605183638_InitialCreate")]
+    [Migration("20260605192852_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -129,6 +129,9 @@ namespace PokeStore.Api.Migrations
                     b.Property<int?>("CartId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("CartId1")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("ConfirmedAt")
                         .HasColumnType("datetime2");
 
@@ -136,6 +139,9 @@ namespace PokeStore.Api.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<int?>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("OrderId1")
                         .HasColumnType("int");
 
                     b.Property<int>("ProductId")
@@ -162,9 +168,13 @@ namespace PokeStore.Api.Migrations
 
                     b.HasIndex("CartId");
 
+                    b.HasIndex("CartId1");
+
                     b.HasIndex("ExpiresAt");
 
                     b.HasIndex("OrderId");
+
+                    b.HasIndex("OrderId1");
 
                     b.HasIndex("ProductId");
 
@@ -318,6 +328,65 @@ namespace PokeStore.Api.Migrations
                     b.ToTable("Payments");
                 });
 
+            modelBuilder.Entity("PokeStore.Api.Core.Entities.ProcessedWebhook", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("IsProcessed")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("ProcessedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("RawPayload")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("TransactionId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("WebhookId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("TransactionId");
+
+                    b.HasIndex("WebhookId")
+                        .IsUnique();
+
+                    b.ToTable("ProcessedWebhooks");
+                });
+
             modelBuilder.Entity("PokeStore.Api.Core.Entities.Product", b =>
                 {
                     b.Property<int>("Id")
@@ -463,14 +532,22 @@ namespace PokeStore.Api.Migrations
             modelBuilder.Entity("PokeStore.Api.Core.Entities.InventoryReservation", b =>
                 {
                     b.HasOne("PokeStore.Api.Core.Entities.Cart", "Cart")
-                        .WithMany("InventoryReservations")
+                        .WithMany()
                         .HasForeignKey("CartId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("PokeStore.Api.Core.Entities.Cart", null)
+                        .WithMany("InventoryReservations")
+                        .HasForeignKey("CartId1");
 
                     b.HasOne("PokeStore.Api.Core.Entities.Order", "Order")
-                        .WithMany("InventoryReservations")
+                        .WithMany()
                         .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("PokeStore.Api.Core.Entities.Order", null)
+                        .WithMany("InventoryReservations")
+                        .HasForeignKey("OrderId1");
 
                     b.HasOne("PokeStore.Api.Core.Entities.Product", "Product")
                         .WithMany("InventoryReservations")
@@ -527,6 +604,17 @@ namespace PokeStore.Api.Migrations
                 {
                     b.HasOne("PokeStore.Api.Core.Entities.Order", "Order")
                         .WithMany("Payments")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+                });
+
+            modelBuilder.Entity("PokeStore.Api.Core.Entities.ProcessedWebhook", b =>
+                {
+                    b.HasOne("PokeStore.Api.Core.Entities.Order", "Order")
+                        .WithMany()
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

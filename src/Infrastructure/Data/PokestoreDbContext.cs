@@ -40,5 +40,18 @@ public class PokestoreDbContext : DbContext
         modelBuilder.ApplyConfiguration(new OrderItemConfiguration());
         modelBuilder.ApplyConfiguration(new PaymentConfiguration());
         modelBuilder.ApplyConfiguration(new ProcessedWebhookConfiguration());
+
+        // EXACT FIX FOR THE CASCADE PATH CRASH (Placed here to override any conflicting configurations)
+        modelBuilder.Entity<InventoryReservation>()
+            .HasOne(i => i.Order)
+            .WithMany() 
+            .HasForeignKey(i => i.OrderId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<InventoryReservation>()
+            .HasOne(i => i.Cart)
+            .WithMany() 
+            .HasForeignKey(i => i.CartId)
+            .OnDelete(DeleteBehavior.NoAction);
     }
 }

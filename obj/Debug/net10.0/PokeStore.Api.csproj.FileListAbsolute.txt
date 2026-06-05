@@ -159,3 +159,4 @@ C:\Users\Maker\PokeStore.Api\obj\Debug\net10.0\refint\PokeStore.Api.dll
 C:\Users\Maker\PokeStore.Api\obj\Debug\net10.0\PokeStore.Api.pdb
 C:\Users\Maker\PokeStore.Api\obj\Debug\net10.0\PokeStore.Api.genruntimeconfig.cache
 C:\Users\Maker\PokeStore.Api\obj\Debug\net10.0\ref\PokeStore.Api.dll
+C:\Users\Maker\PokeStore.Api\obj\Debug\net10.0\PokeStore.Api.sourcelink.json
