@@ -13,37 +13,55 @@ builder.Services
     .AddSwaggerGeneration();
 
 builder.Services.AddControllers();
+
+// CORS: solo orígenes específicos en producción
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policy =>
+    options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader();
+        if (builder.Environment.IsDevelopment())
+        {
+            var origins = builder.Configuration
+                .GetSection("Cors:AllowedOrigins")
+                .Get<string[]>() ?? [];
+
+            policy.WithOrigins(origins)
+                  .AllowAnyMethod()
+                  .AllowAnyHeader();
+        }
+        else
+        {
+            policy.WithOrigins("https://tu-dominio-produccion.com")
+                  .AllowAnyMethod()
+                  .AllowAnyHeader();
+        }
     });
 });
 
-// Add background services
+// Background services
 builder.Services.AddHostedService<InventoryCleanupService>();
 
-// Add logging
+// Logging
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
 
 var app = builder.Build();
 
-// Apply migrations automatically on startup
+// Migraciones: solo automáticas en Development
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<PokestoreDbContext>();
-    dbContext.Database.Migrate();
-    
-    // Seed initial data
+
+    if (app.Environment.IsDevelopment())
+    {
+        dbContext.Database.Migrate();
+    }
+
     SeedData.Initialize(dbContext);
 }
 
-// Configure the HTTP request pipeline
+// HTTP pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -54,9 +72,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseCors("AllowAll");
+app.UseCors("AllowFrontend");
 
-// Add custom middleware
 app.UseMiddleware<ErrorHandlingMiddleware>();
 
 app.UseAuthentication();
